@@ -32,4 +32,3 @@ We'll be happy to work with you.
 [crystal_compiler]: https://crystal-lang.org/docs/installation/index.html
 [discord]: https://discord.gg/nmESdX8
 [scons]: http://scons.org/
-[projects]: https://github.com/TheKernelCorp/NuummiteOS/projects
