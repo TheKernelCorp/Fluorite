@@ -1,0 +1,20 @@
+# Build artifacts
+*.o
+*.iso
+*.kern
+isodir
+sysroot
+bc_flags
+
+# Crystal
+.crystal
+
+# VSCode stuff
+.vscode
+
+# SConstruct
+.sconf_temp
+.sconsign.dblite
+
+# Log files
+*.log
