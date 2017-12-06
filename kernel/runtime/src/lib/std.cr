@@ -2,4 +2,7 @@
 require "./std/object"
 
 # Alpha-sorted list
-# WIP
+require "./std/char"
+require "./std/int"
+require "./std/pointer"
+require "./std/raise"
