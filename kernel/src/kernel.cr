@@ -9,5 +9,5 @@ lib LibBootstrap
 end
 
 fun kmain(info: LibBootstrap::StartInfo)
-    # TODO: Implement
+  kprint "Hello world"
 end
