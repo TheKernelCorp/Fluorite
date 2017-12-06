@@ -1,5 +1,5 @@
 # Order-dependent list
-# WIP
+require "./std/object"
 
 # Alpha-sorted list
 # WIP
