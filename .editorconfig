@@ -1,0 +1,29 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+# Root
+root = true
+
+# Use unix line endings
+[*]
+end_of_line = lf
+
+# Crystal
+[*.cr]
+charset = utf-8
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+
+# Assembly and linker scripts
+[*.{asm,ld}]
+charset = ascii
+indent_size = 2
+indent_style = space
+insert_final_newline = false
+
+# SConstruct
+[SConstruct]
+charset = utf-8
+indent_size = 2
+indent_style = space
+insert_final_newline = false
