@@ -38,12 +38,20 @@ section .text
   extern END_OF_KERNEL
   extern kmain
 
+  ; StartInfo structure
+  struc StartInfo
+    .multiboot_ptr: resd 1
+    .end_of_kernel: resd 1
+    .size:
+  endstruc
+
   ; Entry point
   start:
     cli                       ; Disable interrupts
     mov esp, stack.top        ; Setup kernel stack
-    push ebx                  ; Push multiboot pointer
-    push dword END_OF_KERNEL  ; Push end of kernel
+    mov [startinfo + StartInfo.multiboot_ptr], ebx
+    mov [startinfo + StartInfo.end_of_kernel], dword END_OF_KERNEL
+    push startinfo            ; Push start info
     call kmain                ; Action!
   .hang:
     cli                       ; Disable interrupts
@@ -59,3 +67,7 @@ section .bss
   stack:
     resb 16384 ; 16 KiB
   .top:
+
+  ; StartInfo
+  startinfo:
+    resb StartInfo.size
