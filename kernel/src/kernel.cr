@@ -1,4 +1,4 @@
-require "../runtime/src/prelude"
+require "../minrt/src/prelude"
 
 lib LibBootstrap
   @[Packed]
