@@ -32,6 +32,17 @@ struct HeapAllocator(T)
     block.as T*
   end
 
+  # Allocates a block of zero-filled memory.
+  def self.calloc : T*
+    
+    # Allocate zeroed memory
+    block = Heap.calloc sizeof(T).to_u32
+
+    # Cast allocated block to target type
+    block.as T*
+  end
+
+  # Reallocates a pointer.
   def self.realloc(ptr : _*, size : UInt32) : T*
 
     # Reallocate memory
@@ -41,6 +52,7 @@ struct HeapAllocator(T)
     block.as T*
   end
 
+  # Reallocates a pointer.
   def self.realloc(ptr : _*) : T*
 
     # Reallocate memory
@@ -83,13 +95,27 @@ module Heap
     end
   end
 
+  # Allocates a block of uninitialized memory.
   def kalloc(size : UInt32) : Void*
 
     # Allocate a block
     block = alloc size
 
     # Return the user data
-    block.value.bdata.as Void*
+    block.value.bdata.to_void_ptr
+  end
+
+  # Allocates a block of zero-filled memory.
+  def calloc(size : UInt32) : Void*
+
+    # Allocate a block
+    block = alloc size
+
+    # Zero-fill the block
+    LibK.memset block.value.bdata, 0, block.value.bsize
+
+    # Return the user data
+    block.value.bdata.to_void_ptr
   end
 
   # Allocates a block.
@@ -278,33 +304,6 @@ module Heap
     end
   end
 
-  # Finds the associated block header of a pointer.
-  private def find_associated_block(ptr : _*) : Block* | Nil
-
-    # Cast the ptr to Void*
-    ptr = ptr.to_void_ptr
-    
-    # Get the last used block
-    current_block = @@last_used
-
-    # Loop while the current block is valid
-    while current_block
-
-      # Get the block
-      block = current_block.value
-
-      # Test if the data block equals the target block
-      if block.bdata == ptr
-
-        # Return the associated block
-        return current_block
-      end
-
-      # Get the next block
-      current_block = block.bnext
-    end
-  end
-
   def free(ptr : _*)
 
     # Get the last used block
@@ -336,6 +335,33 @@ module Heap
 
       # Mark this block as the last one
       last_block = current_block
+
+      # Get the next block
+      current_block = block.bnext
+    end
+  end
+
+  # Finds the associated block header of a pointer.
+  private def find_associated_block(ptr : _*) : Block* | Nil
+
+    # Cast the ptr to Void*
+    ptr = ptr.to_void_ptr
+    
+    # Get the last used block
+    current_block = @@last_used
+
+    # Loop while the current block is valid
+    while current_block
+
+      # Get the block
+      block = current_block.value
+
+      # Test if the data block equals the target block
+      if block.bdata == ptr
+
+        # Return the associated block
+        return current_block
+      end
 
       # Get the next block
       current_block = block.bnext
