@@ -43,7 +43,6 @@ section .text
   struc StartInfo
     .multiboot_ptr: resd 1
     .end_of_kernel: resd 1
-    .magic:         resd 1
     .size:
   endstruc
 
