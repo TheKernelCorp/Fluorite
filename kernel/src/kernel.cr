@@ -16,8 +16,10 @@ fun kearly(info_ptr: LibBootstrap::StartInfo*)
   # Initialize heap
   Heap.init info.end_of_kernel
 
-  # Initialize the GDT
+  # Initialize all the important stuff
   GDT.init
+  PIC.remap
+  PIC.enable
 end
 
 fun kmain
