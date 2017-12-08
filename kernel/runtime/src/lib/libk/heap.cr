@@ -14,6 +14,7 @@ private lib LibHeap
   @[Packed]
   struct Block
     bsize : UInt32
+    dsize : UInt32
     bnext : Block*
     bdata : UInt8*
   end
@@ -121,9 +122,6 @@ module Heap
   # Allocates a block.
   private def alloc(size : UInt32) : Block*
 
-    # Align the block size to the block size multiple
-    size = align_block_size size
-
     # Try to find an existing block of sufficient size.
     # If that fails, allocate a new block.
     block = find_or_alloc_block size
@@ -160,18 +158,22 @@ module Heap
 
       # Return Nil if the allocation failed
       return unless block
+
+      # Align the block size to the block size multiple
+      size_aligned = align_block_size size
       
       # Set the block size
-      block.value.bsize = size
+      block.value.bsize = size_aligned
+      block.value.dsize = size
 
       # Allocate the actual data block
-      user_data = alloc_block size
+      user_data = alloc_block size_aligned
 
       # If the data block allocation failed
       unless user_data
 
         # Deallocate the previously allocated block
-        block_size_total_aligned = align_address calc_block_size block_size
+        block_size_total_aligned = calc_block_size block_size
         @@next_addr -= block_size_total_aligned.to_i32
 
         # Return Nil
@@ -187,7 +189,7 @@ module Heap
   end
 
   # Attempts to find a fitting block.
-  # Uses first-fit linear search.
+  # Uses best-fit linear search.
   private def find_fitting_block(size : UInt32) : Block* | Nil
 
     # Get the next free block
@@ -201,7 +203,7 @@ module Heap
       block = current_block.value
 
       # Test if the block fits
-      if block.bsize <= size
+      if block.dsize == size
 
         # Link the other blocks back together
         if current_block == last_block
@@ -243,7 +245,7 @@ module Heap
     addr.as(UInt32*).value = GUARD2
 
     # Offset the next unused address
-    @@next_addr += align_address calc_block_size size
+    @@next_addr += calc_block_size size
     
     # Return the allocated data block
     addr_data_start
@@ -281,23 +283,20 @@ module Heap
     block_size = block.value.bsize
 
     # Test if the block still fits
-    if block_size < size
+    if block_size <= size
 
       # Return the current block
       ptr.to_void_ptr
     else
 
-      # Allocate a new block
-      new_block = kalloc size
-
-      # Zero-fill the new block
-      LibK.memset new_block, 0_u8, size
-
-      # Copy the data to the new block
-      LibK.memcpy new_block, ptr, block_size
-
       # Free the old block
       free ptr
+
+      # Allocate a new zero-filled block
+      new_block = calloc size
+
+      # Copy the data to the new block
+      LibK.memmove new_block, ptr, block.value.dsize
 
       # Return the new block
       new_block.to_void_ptr
