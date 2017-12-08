@@ -20,11 +20,10 @@ private lib LibHeap
 end
 
 # Generic heap allocator
-module HeapAllocator(T)
-  extend self
+struct HeapAllocator(T)
 
   # Allocates a block of uninitialized memory.
-  def kalloc : T*
+  def self.kalloc : T*
 
     # Allocate memory
     block = Heap.kalloc sizeof(T).to_u32
