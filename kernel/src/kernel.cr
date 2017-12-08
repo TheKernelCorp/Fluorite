@@ -12,6 +12,9 @@ fun kearly(info_ptr: LibBootstrap::StartInfo*)
 
   # Get the startup info
   info = info_ptr.value
+
+  # Initialize heap
+  Heap.init info.end_of_kernel
 end
 
 fun kmain
