@@ -37,6 +37,7 @@ module Terminal
       write_byte c[i]
       i += 1
     end
+    update_cursor @@x, @@y
   end
 
   # Writes an `UInt8` to the screen.
