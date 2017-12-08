@@ -31,15 +31,30 @@ struct HeapAllocator(T)
     # Cast allocated block to target type
     block.as T*
   end
+
+  def self.realloc(ptr : _*, size : UInt32) : T*
+
+    # Reallocate memory
+    block = Heap.realloc ptr, size
+
+    # Cast block to target type
+    block.as T*
+  end
+
+  def self.realloc(ptr : _*) : T*
+
+    # Reallocate memory
+    self.realloc ptr, sizeof(T).to_u32
+  end
 end
 
 module Heap
   extend self
 
   # Module variables
-  @@next_addr = Pointer(UInt8).null # free_addr
-  @@next_free = Pointer(Block).null # free_top
-  @@last_used = Pointer(Block).null # used_top
+  @@next_addr = Pointer(UInt8).null
+  @@next_free = Pointer(Block).null
+  @@last_used = Pointer(Block).null
 
   def init(end_of_kernel : UInt32)
 
@@ -105,7 +120,7 @@ module Heap
   private def find_or_alloc_block(size : UInt32) : Block* | Nil
     
     # Try finding a block of sufficient size
-    block = find_block size
+    block = find_fitting_block size
 
     # If no block was found
     unless block
@@ -147,7 +162,7 @@ module Heap
 
   # Attempts to find a fitting block.
   # Uses first-fit linear search.
-  private def find_block(size : UInt32) : Block* | Nil
+  private def find_fitting_block(size : UInt32) : Block* | Nil
 
     # Get the next free block
     current_block = @@next_free
@@ -164,7 +179,7 @@ module Heap
 
         # Link the other blocks back together
         if current_block == last_block
-          @@last_used = block.bnext
+          @@next_free = block.bnext
         else
           last_block.value.bnext = block.bnext
         end
@@ -208,9 +223,86 @@ module Heap
     addr_data_start
   end
 
-  private def realloc(ptr : _*, size : UInt32) : UInt8*
-    # TODO
-    raise "Heap#realloc not implemented!"
+  def realloc(ptr : _*, size : UInt32) : Void*
+
+    # Test if the ptr is a null pointer
+    if ptr.null?
+
+      # Allocate a new block
+      block = kalloc size
+
+      # Return the newly allocated block
+      return block.to_void_ptr
+    end
+
+    # Try finding the associated block
+    block = find_associated_block ptr
+
+    # Return a null pointer if the pointer is unmanaged
+    return Pointer(Void).null unless block
+
+    # Test if the requested size is 0
+    if size == 0
+
+      # Free the block
+      free ptr
+
+      # Return a null pointer
+      return Pointer(Void).null
+    end
+
+    # Get the block size
+    block_size = block.value.bsize
+
+    # Test if the block still fits
+    if block_size < size
+
+      # Return the current block
+      ptr.to_void_ptr
+    else
+
+      # Allocate a new block
+      new_block = kalloc size
+
+      # Zero-fill the new block
+      LibK.memset new_block, 0_u8, size
+
+      # Copy the data to the new block
+      LibK.memcpy new_block, ptr, block_size
+
+      # Free the old block
+      free ptr
+
+      # Return the new block
+      new_block.to_void_ptr
+    end
+  end
+
+  # Finds the associated block header of a pointer.
+  private def find_associated_block(ptr : _*) : Block* | Nil
+
+    # Cast the ptr to Void*
+    ptr = ptr.to_void_ptr
+    
+    # Get the last used block
+    current_block = @@last_used
+
+    # Loop while the current block is valid
+    while current_block
+
+      # Get the block
+      block = current_block.value
+
+      # Test if the data block equals the target block
+      if block.bdata == ptr
+
+        # Return the associated block
+        return current_block
+      end
+
+      # Get the next block
+      current_block = block.bnext
+    end
   end
 
   def free(ptr : _*)
