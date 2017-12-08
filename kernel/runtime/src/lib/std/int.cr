@@ -1,3 +1,9 @@
+{% if flag?(:x86_64) %}
+  alias USize = UInt64
+{% else %}
+  alias USize = UInt32
+{% end %}
+
 struct Int
   alias Signed = Int8 | Int16 | Int32 | Int64
   alias Unsigned = UInt8 | UInt16 | UInt32 | UInt64
