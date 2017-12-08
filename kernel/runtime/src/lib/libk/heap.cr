@@ -112,7 +112,7 @@ module Heap
     block = alloc size
 
     # Zero-fill the block
-    LibK.memset block.value.bdata, 0, block.value.bsize
+    LibK.memset block.value.bdata, 0_u8, block.value.bsize
 
     # Return the user data
     block.value.bdata.to_void_ptr
