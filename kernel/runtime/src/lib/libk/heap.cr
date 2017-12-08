@@ -1,6 +1,6 @@
 # Alignment constants
-private ADDRESS_ALIGNMENT   = 8_u32
-private BLOCK_SIZE_MULTIPLE = 8_u32
+private ADDRESS_ALIGNMENT   = 4_u32 # Align to 32 bits
+private BLOCK_SIZE_MULTIPLE = 4_u32 # Align to 32 bits
 
 # Guards to check for heap corruption
 private GUARD1 = 0x464c554f_u32 # FLUO
