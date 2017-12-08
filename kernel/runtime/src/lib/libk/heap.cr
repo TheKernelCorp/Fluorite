@@ -60,13 +60,8 @@ module Heap
     # Loop while the current block is valid
     while current_block
 
-      # Get the guard values
-      guard1 = (current_block.value.bdata - sizeof(GUARD1)).as(UInt32*).value
-      guard2 = (current_block.value.bdata + current_block.value.bsize).as(UInt32*).value
-
-      # Validate guard integrity
-      raise "HEAP_VALIDATE_FAIL_GUARD1" unless guard1 == GUARD1
-      raise "HEAP_VALIDATE_FAIL_GUARD2" unless guard2 == GUARD2
+      # Validate the block
+      validate_block current_block
 
       # Get the next block
       current_block = current_block.value.bnext
@@ -153,7 +148,37 @@ module Heap
   # Attempts to find a fitting block.
   # Uses first-fit linear search.
   private def find_block(size : UInt32) : Block* | Nil
-    # TODO
+
+    # Get the next free block
+    current_block = @@next_free
+    last_block = current_block
+
+    # Loop while the current block is valid
+    while current_block
+
+      # Get the block
+      block = current_block.value
+
+      # Test if the block fits
+      if block.bsize <= size
+
+        # Link the other blocks back together
+        if current_block == last_block
+          @@last_used = block.bnext
+        else
+          last_block.value.bnext = block.bnext
+        end
+
+        # Return the block
+        return current_block
+      end
+
+      # Mark this block as the last one
+      last_block = current_block
+      
+      # Get the next block
+      current_block = block.bnext
+    end
   end
 
   # Allocates a raw data block.
@@ -188,9 +213,56 @@ module Heap
     raise "Heap#realloc not implemented!"
   end
 
-  private def free(ptr : _*)
-    # TODO
-    raise "Heap#free not implemented!"
+  def free(ptr : _*)
+
+    # Get the last used block
+    current_block = @@last_used
+    last_block = current_block
+
+    # Loop while the current block is valid
+    while current_block
+
+      # Get the block
+      block = current_block.value
+
+      # Test if the data block equals the block to be freed
+      if block.bdata == ptr
+
+        # Validate the user data
+        validate_block current_block
+
+        # Link the other blocks back together
+        if current_block == last_block
+          @@last_used = block.bnext
+        else
+          last_block.value.bnext = block.bnext
+        end
+
+        # Mark the block as free
+        @@next_free = current_block
+      end
+
+      # Mark this block as the last one
+      last_block = current_block
+
+      # Get the next block
+      current_block = block.bnext
+    end
+  end
+
+  # Validates the integrity of a data block.
+  private def validate_block(block : Block*)
+
+    # Get the block
+    block = block.value
+
+    # Get the guard values
+    guard1 = (block.bdata - sizeof(GUARD1)).as(UInt32*).value
+    guard2 = (block.bdata + block.bsize).as(UInt32*).value
+
+    # Validate guard integrity
+    raise "HEAP_VALIDATE_FAIL_GUARD1" unless guard1 == GUARD1
+    raise "HEAP_VALIDATE_FAIL_GUARD2" unless guard2 == GUARD2
   end
 
   # Calculates the total size of a block.
