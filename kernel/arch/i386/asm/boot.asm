@@ -63,6 +63,16 @@ section .text
     cli                       ; Disable interrupts
     hlt                       ; Halt
     jmp .hang                 ; Repeat
+  
+  ;
+  ; Glue
+  ;
+
+  global glue_flush_gdt
+  glue_flush_gdt:
+    jmp 0x08:.flush
+  .flush:
+    ret
 
 ;
 ; Uninitialized data
