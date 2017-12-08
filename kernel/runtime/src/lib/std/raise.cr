@@ -26,6 +26,10 @@ end
 # Initiates a kernel panic.
 # TODO: Implement this properly
 def panic(message : String = "KERNEL PANIC", __file__ = __FILE__, __line__ = __LINE__) : NoReturn
+
+  # Print the message
+  kprint message
+
   # Disable interrupts and halt
   asm("cli; hlt")
   while true
