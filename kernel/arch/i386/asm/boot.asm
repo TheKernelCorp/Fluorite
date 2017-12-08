@@ -36,12 +36,14 @@ section .text
 
   ; Extern
   extern END_OF_KERNEL
+  extern kearly
   extern kmain
 
   ; StartInfo structure
   struc StartInfo
     .multiboot_ptr: resd 1
     .end_of_kernel: resd 1
+    .magic:         resd 1
     .size:
   endstruc
 
@@ -51,8 +53,13 @@ section .text
     mov esp, stack.top        ; Setup kernel stack
     mov [startinfo + StartInfo.multiboot_ptr], ebx
     mov [startinfo + StartInfo.end_of_kernel], dword END_OF_KERNEL
+    push ebp                  ; Save old call frame
+    mov ebp, esp              ; Init new call frame
     push startinfo            ; Push start info
-    call kmain                ; Action!
+    call kearly               ; Call kearly
+    mov esp, ebp              ; Clear call frame
+    pop ebp                   ; Restore call frame
+    call kmain                ; Call kmain
   .hang:
     cli                       ; Disable interrupts
     hlt                       ; Halt

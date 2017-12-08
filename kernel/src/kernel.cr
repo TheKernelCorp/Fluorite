@@ -8,6 +8,12 @@ lib LibBootstrap
   end
 end
 
-fun kmain(info: LibBootstrap::StartInfo)
-  kprint "Hello world"
+fun kearly(info_ptr: LibBootstrap::StartInfo*)
+
+  # Get the startup info
+  info = info_ptr.value
+end
+
+fun kmain
+  kprint "Hello from Fluorite."
 end
