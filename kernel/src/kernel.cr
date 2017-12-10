@@ -18,8 +18,10 @@ fun kearly(info_ptr: LibBootstrap::StartInfo*)
   Heap.init info.end_of_kernel
   PIC.remap
   PIC.enable
+  IDT.init
 end
 
 fun kmain
+  IDT.enable_interrupts
   kprint "Hello from Fluorite."
 end

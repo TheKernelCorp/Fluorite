@@ -73,6 +73,11 @@ section .text
     jmp 0x08:.flush
   .flush:
     ret
+  
+  global glue_init_idt
+  glue_init_idt:
+    call extern idt_setup
+    ret
 
 ;
 ; Uninitialized data
