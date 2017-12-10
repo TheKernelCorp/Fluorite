@@ -10,8 +10,8 @@ private PIC_MASTER_COMMAND = 0x20_u16
 private PIC_MASTER_DATA = 0x21_u16
 
 # PIC 2 (Slave)
-private PIC_SLAVE_COMMAND = 0xA0_u16
-private PIC_SLAVE_DATA = 0xA1_u16
+private PIC_SLAVE_COMMAND = 0xA0_u16  # PIC_MASTER_COMMAND + 0x80
+private PIC_SLAVE_DATA = 0xA1_u16     # PIC_MASTER_DATA + 0x80
 
 # ICW 1
 private PIC_ICW1_ICW4 = 0x01_u8
