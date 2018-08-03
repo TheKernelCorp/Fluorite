@@ -163,7 +163,6 @@ env['LDFLAGS'] = (
 # Compiler
 env['CC'] = 'crystal'
 env['CCFLAGS'] = (
-  ' --emit=obj'
   ' --cross-compile'
   ' --target={target}'
   ' --prelude=empty'
