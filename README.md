@@ -17,6 +17,15 @@ We'll be happy to work with you.
 - Run `scons test` to run Runtime tests.
 - Run `scons --qemu-curses` to build and run qemu
 
+## Building via Docker
+
+- Build the Docker image: `docker build -t fluorite-builder .`
+- Use the image to compile the code: `docker run --rm -v $(pwd):/build -t fluorite-builder`
+- Any arguments to `scons` can be passed in like this:
+  `docker run --rm -v $(pwd):/build -t fluorite-builder -- test` <- runs `scons test` within the container.
+
+- all build artifacts will be placed in the `./build` directory
+
 ## Troubleshooting
 
 **`xorriso : FAILURE : Cannot find path '/efi.img' in loaded ISO image`** `or`   
